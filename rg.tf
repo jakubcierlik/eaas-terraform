@@ -160,18 +160,31 @@ resource "azurerm_virtual_network" "vnet" {
   location            = var.azure_location_name
   resource_group_name = azurerm_resource_group.rg.name
   address_space       = [var.cidr_block]
-
-  subnet {
-    name           = var.subnet_1_name
-    address_prefix = var.subnet_1_cidr
-  }
-
-  subnet {
-    name           = var.subnet_2_name
-    address_prefix = var.subnet_2_cidr
-  }
-
 #   tags = var.vnet_tags
+}
+
+resource "azurerm_subnet" "subnet_1" {
+  name                 = var.subnet_1_name
+  resource_group_name  = azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = [var.subnet_1_cidr]
+}
+
+resource "azurerm_subnet" "subnet_2" {
+  name                 = var.subnet_2_name
+  resource_group_name  = azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = [var.subnet_2_cidr]
+}
+
+resource "azurerm_subnet_network_security_group_association" "sgtosubnet1" {
+  subnet_id                 = azurerm_subnet.subnet_1.id
+  network_security_group_id = azurerm_network_security_group.sg.id
+}
+
+resource "azurerm_subnet_network_security_group_association" "sgtosubnet2" {
+  subnet_id                 = azurerm_subnet.subnet_2.id
+  network_security_group_id = azurerm_network_security_group.sg.id
 }
 
 resource "azurerm_storage_account" "sa" {
